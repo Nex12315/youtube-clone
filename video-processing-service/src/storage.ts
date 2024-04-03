@@ -16,7 +16,10 @@ const localProcessedVideoPath = "./processed-videos";
 /**
  * Creates the local directories for raw and processed videos.
  */
-export function setupDirectories() {}
+export function setupDirectories() {
+  ensureDirectoryExistence(localRawVideoPath);
+  ensureDirectoryExistence(localProcessedVideoPath);
+}
 
 /**
  * @param rawVideoName - The name of the file to convert from {@link localRawVideoPath}.
@@ -72,4 +75,56 @@ export async function uploadProcessedVideo(fileName: string) {
   );
 
   await bucket.file(fileName).makePublic();
+}
+
+/**
+ * @param fileName - The name of the file to delete from the
+ * {@link localRawVideoPath} folder.
+ * @returns A promise that resolves when the file has been deleted.
+ */
+export function deleteRawVideo(fileName: string) {
+  return deleteFile(`${localRawVideoPath}/${fileName}`);
+}
+
+/**
+ * @param fileName - The name of the file to delete from the
+ * {@link localProcessedVideoPath} folder.
+ * @returns A promise that resolves when the file has been deleted.
+ */
+export function deleteProcessedVideo(fileName: string) {
+  return deleteFile(`${localProcessedVideoPath}/${fileName}`);
+}
+
+/**
+ * @param filePath - The path of the file to delete.
+ * @returns A promise that resolves when the file has been deleted.
+ */
+function deleteFile(filePath: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if (fs.existsSync(filePath)) {
+      fs.unlink(filePath, (err) => {
+        if (err) {
+          console.log(`Failed to delete file at ${filePath}`, err);
+          reject(err);
+        } else {
+          console.log(`File deleted at ${filePath}`);
+          resolve();
+        }
+      });
+    } else {
+      console.log(`File not found at ${filePath}, skipping the delet.`);
+      resolve();
+    }
+  });
+}
+
+/**
+ * Ensures a directory exists, creating it if necessary.
+ * @param {string} dirPath - The directory path to check.
+ */
+function ensureDirectoryExistence(dirPath: string) {
+  if (!fs.existsSync(dirPath)) {
+    fs.mkdirSync(dirPath, { recursive: true }); // recursive: true enables creating nested directories
+    console.log(`Directory created at ${dirPath}`);
+  }
 }
