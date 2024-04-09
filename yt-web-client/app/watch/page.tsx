@@ -1,7 +1,10 @@
+import { Suspense } from "react";
+import Video from "./video";
+
 export default function Watch() {
   return (
-    <div>
-      <h1>Watch Page</h1>
-    </div>
+    <Suspense>
+      <Video />
+    </Suspense>
   );
 }
